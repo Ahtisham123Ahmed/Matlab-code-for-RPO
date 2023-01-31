@@ -1,0 +1,88 @@
+clc
+%Step-1 ( The X,Y position of Robot(R), Obstacle(O) and
+Target(T)
+Xr=4 %x-Cordinate of Robot
+Yr=3 %y-Cordinate of Robot
+Xo=4.5 %x-Cordinate of
+Obstacle
+Yo=4 %y-Cordinate of
+Obstacle
+Xt=5 %x-Cordinate of Target
+Yt=5 %x-Cordinate of Target
+Ao=1 %Alpha knot shows
+height of Obstacle
+At=1 %Alphat T shows depth
+of Target
+Mo=4 %Meu knot shows lenght
+of Obstacle
+Mt=4 %Meu T shows lenght of
+Target
+Robot=[Xr,Yr]
+plot([Xr Xt],[Yr Yt],'r') %Plot of Robot
+hold on
+Obstacle=[Xo,Yo] %Plot of Obstacle
+hold on
+Target=[Xt,Yt] %Plot of Target
+%Step-2 ( Stepsize or Radius )
+NPTS=100 %Number of Artificial
+points
+DRO=norm(Robot-Obstacle) %Distance between Robot
+and Obstacle OR DRO=sqrt((Xo-Xr)^2+(Yo-Yr)^2)
+Ct=0.4*DRO %Radius
+viscircles([Xr,Yr],Ct)
+
+%Step-3 ( No of Artificial Points and StepDegree )
+StpDeg=360/NPTS %StepDegree
+%step-4 ( Jobstacle , JTarget and Jtotal of Original Points )
+Jobs=Ao*exp(-Mo*((Xr-Xo)^2+(Yr-Yo)^2)) %Value of J obstacle
+Jtar=-Ao*exp(-Mo*((Xr-Xt)^2+(Yr-Yt)^2)) %Value of J target
+Jtotal=Jobs+Jtar %Value of Jtotal
+%Step-5 ( Distance from Robot to Target )
+DRT=sqrt((Xt-Xr)^2+(Yt-Yr)^2) %Distance btw Robot
+and Target
+index=0
+file=fopen('LAB-NO-4_6 PathPlanning.txt','w')
+theta(1)=0
+fprintf(file,'AP\t\t\tx\t\t\t\ty\t\t\tJobsctc\t\t\tjgoalc\t\t\
+tjtotalc\t\t\terrorj\t\t\terrorD')
+for AP=1:NPTS
+%Step-7 ( X , Y positions for Artificial Points Generated )
+X(AP)=Xr+Ct*cos(pi*theta(AP)/180)
+Y(AP)=Yr+Ct*sin(pi*theta(AP)/180)
+theta(AP+1)=theta(AP)+StpDeg
+%plot([X(AP) Xt],[Y(AP) Yt],'g ')
+%cost function for AP
+Jobs(AP)=Ao*exp(-Mo*((X(AP)-Xo(1))^2+(Y(AP)-Yo(1))^2))
+Jtar(AP)=-Ao*exp(-Mo*((X(AP)-Xt)^2+(Y(AP)-Yt)^2))
+Jtot(AP)=Jobs(AP)+Jtar(AP)
+
+%Step-8 ( Error of cost function {errJ} )
+errJ(AP)=Jtot(AP)-Jtotal
+
+%Step-9 ( distance of Artificial Points to Goal )
+DRTt(AP)=sqrt((X(AP)-Xt)^2+(Y(AP)-Yt)^2)
+%Step-10 ( Error in Distance to Goal {errD} )
+errD(AP)=DRTt(AP)-DRT
+fprintf(file,'\n%d\t\t%f\t\t%f\t\t%f\t\t%d\t\t%f\t\t%f\t\t%f\t
+\t',AP,X(AP),Y(AP),Jobs(AP),Jtar(AP),Jtot(AP),errJ(AP),errD(AP
+))
+if(errJ(AP)<0 && errD(AP)<0)
+fprintf(file,'number found')
+fprintf(file,'\t%d\t\t%f\t%f\t%f',(AP+1),theta(AP),X(AP),Y(AP)
+)
+
+if (index==0)
+index=AP
+end
+elseif (index~=0)
+if errD(index) < errD(AP)
+index=index
+elseif errD(AP) < errD(index)
+index=AP
+plot([X(AP) Xt],[Y(AP) Yt],'g ')
+end
+
+else
+disp(AP)
+end
+end
