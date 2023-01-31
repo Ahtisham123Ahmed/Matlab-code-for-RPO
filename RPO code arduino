@@ -1,0 +1,67 @@
+double Xr,Yr,Xo,Yo,Xt,Yt,X_ib,Y_ib ; // coordinates of robot and obstacle and
+target
+double Jobs,Jtar,Jtotal,Jobs_AP,Jtar_AP,Jtot_AP ; // cost function parameters
+double DRT,DRT_AP, DRO; //distances
+double errJ[10],errD[10],F_errD[10],F_errj[10]; //errors
+double Ao,At,Mo,Mt;
+double theta_r,Theta[10];
+double Ct,NPTS,StpDeg;
+int x=1;
+int index=0;
+void setup() {
+// put your setup code here, to run once:
+Serial.begin(9600);
+}
+void loop() {
+// put your main code here, to run repeatedly:
+RPO_CODE();
+}
+double RPO_CODE()
+{
+Xr = 4;
+Yr = 3;
+Xo = 4.5;
+Yo = 4;
+Xt = 5;
+Yt = 5;
+Ao = 1;
+Mo = 4;
+At = 1;
+Mt = 4;
+NPTS = 6;
+StpDeg=360/NPTS ;
+Jobs=Ao*exp(-Mo*(sqrt(pow((Xr-Xo),2)+pow((Yr-Yo),2)))) ;
+Jtar=-Ao*exp(-Mo*(sqrt(pow((Xr-Xt),2)+pow((Yr-Yt),2))));
+Jtotal=Jobs+Jtar ;
+DRT=sqrt(pow((Xt-Xr),2+pow((Yt-Yr),2))) ;
+DRO=sqrt(pow((Xo-Xr),2+pow((Yo-Yr),2)));
+Ct=0.4*DRO;
+for(int i=0;i<NPTS ;i++)
+{
+Theta[0] = 0;
+X_ib=Xr+Ct*cos((3.14*theta_r)/180);
+Y_ib=Yr+Ct*sin((3.14*theta_r)/180);
+Jobs_AP=Ao*exp(-Mo*(sqrt(pow((X_ib-Xo),2)+pow((Y_ib-Yo),2)))) ;
+Jtar_AP=-Ao*exp(-Mo*(sqrt(pow((X_ib-Xt),2)+pow((Y_ib-Yt),2))));
+Jtot_AP=Jobs_AP+Jtar_AP;
+DRT_AP=sqrt(pow((X_ib-Xt),2+pow((Y_ib-Yt),2))) ;
+errD[i]=DRT_AP-DRT ;
+errJ[i]=Jtot_AP-Jtotal ;
+Theta[1+i] += StpDeg;
+if(errJ[i]&&errD[i]<0)
+{
+F_errD[x]=errD[i];
+F_errD[x]=errJ[i];
+x+=1;
+}
+if (index==0)
+{index=i;}
+else (index!=0);
+{
+if (F_errD[index] < F_errD[x])
+index=index;
+else (F_errD[x] < F_errD[index]);
+index=x;
+}
+}
+}
